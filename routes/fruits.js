@@ -23,7 +23,7 @@ let fruits = [
 
 // Get all fruits
 router.get("/", (req, res) => {
-  res.json(fruits);
+    res.json(fruits);
 });
 
 // Get a particular fruit by its index in the array
