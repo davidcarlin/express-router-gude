@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { check, validationResult } = require("express-validator");
 
 // List of Users
 let users = [
@@ -37,17 +38,29 @@ router.get("/:id", (req, res) => {
 });
 
 // Create a new user
-router.post("/", (req, res) => {
-  const { name, age } = req.body;
+router.post(
+  "/",
+  [
+    check("name", "Name field is required and cannot be empty")
+      .trim()
+      .notEmpty(),
+    check("age", "Age field is required and must be a positive number").isInt({
+      min: 1,
+    }),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
 
-  if (!name || !age) {
-    res.status(400).send("Please provide a name and age for the user");
-  } else {
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { name, age } = req.body;
     const newUser = { name, age };
     users.push(newUser);
     res.status(201).json(newUser);
   }
-});
+);
 
 // Update an existing user
 router.put("/:id", (req, res) => {

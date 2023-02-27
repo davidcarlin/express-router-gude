@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { check, validationResult } = require("express-validator");
 
 // List of Fruits
 let fruits = [
@@ -37,17 +38,26 @@ router.get("/:id", (req, res) => {
 });
 
 // Create a new fruit
-router.post("/", (req, res) => {
-  const { name, color } = req.body;
+router.post(
+  "/",
+  [
+    check("color", "Color field is required and cannot be empty")
+      .trim()
+      .notEmpty(),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
 
-  if (!name || !color) {
-    res.status(400).send("Please provide a name and color for the fruit");
-  } else {
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { name, color } = req.body;
     const newFruit = { name, color };
     fruits.push(newFruit);
     res.status(201).json(newFruit);
   }
-});
+);
 
 // Update a fruit
 router.put("/:id", (req, res) => {
